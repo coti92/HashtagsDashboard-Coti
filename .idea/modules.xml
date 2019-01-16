@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/../HashtagsDashboard[Charts]/.idea/HashtagsDashboard[Charts].iml" filepath="$PROJECT_DIR$/../HashtagsDashboard[Charts]/.idea/HashtagsDashboard[Charts].iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/HashtagsDashboard.iml" filepath="$PROJECT_DIR$/.idea/HashtagsDashboard.iml" />
     </modules>
   </component>
 </project>
