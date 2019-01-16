@@ -4,10 +4,10 @@
     <option name="enabled" value="true" />
   </component>
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
     <content url="file://C:/spark-2.4.0-bin-hadoop2.7/python" />
+    <content url="file://$MODULE_DIR$" />
     <content url="jar://C:/spark-2.4.0-bin-hadoop2.7/python/lib/py4j-0.10.7-src.zip!/" />
-    <orderEntry type="jdk" jdkName="Python 3.7" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 2.7 (HashtagsDashboard-Coti)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">
