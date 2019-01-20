@@ -1,5 +1,13 @@
 ##############STREAMNG##############
 
+
+from pyspark import SparkConf,SparkContext
+from pyspark.streaming import StreamingContext
+from pyspark.sql import Row,SQLContext
+import sys
+import requests
+
+
 def get_sql_context_instance(spark_context):
 
     if ('sqlContextSingletonInstance' not in globals()):
@@ -58,12 +66,6 @@ def send_df_to_dashboard(df):
     response = requests.post(url, data=request_data)
 
 
-
-from pyspark import SparkConf,SparkContext
-from pyspark.streaming import StreamingContext
-from pyspark.sql import Row,SQLContext
-import sys
-import requests
 
 # crea una configuracion spark
 config = SparkConf()
