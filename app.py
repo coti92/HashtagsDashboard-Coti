@@ -19,6 +19,7 @@ def refresh_graph_data():
 
         global labels, values
         print("labels now: " + str(labels))
+
         print("data now: " + str(values))
         return jsonify(sLabel=labels, sData=values)
 

@@ -1,6 +1,3 @@
-##############STREAMNG##############
-
-
 from pyspark import SparkConf,SparkContext
 from pyspark.streaming import StreamingContext
 from pyspark.sql import Row,SQLContext
@@ -35,8 +32,7 @@ def process_rdd(time, rdd):
         hashtags_df.registerTempTable("hashtags")
 
         # obten los 10 mejores hashtags de la tabla utilizando sqL e imprimelos
-        hashtag_counts_df = sql_context.sql\
-            ( "select hashtag , hashtag_count from hashtags order by hashtag_count desc limit 10" )
+        hashtag_counts_df = sql_context.sql( "select hashtag , hashtag_count from hashtags order by hashtag_count desc limit 10" )
         hashtag_counts_df.show()
 
         # llama a este metodo para preparar los 10 mejores hashtag DF y envialos
@@ -71,7 +67,7 @@ def send_df_to_dashboard(df):
 config = SparkConf()
 config.setAppName("TwitterStreamApp")
 
-# crea un cntexto spark con la configuracion anterior
+# crea un contexto spark con la configuracion anterior
 sc = SparkContext(conf=config)
 sc.setLogLevel("ERROR")
 
