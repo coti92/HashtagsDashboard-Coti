@@ -1,29 +1,36 @@
 import socket
 import sys
-import tweepy
+import requests
+import requests_oauthlib
+import json
 
-consumer_key = 'HxTwHU4NS9ozBy5umXh5Y0VYv'
-consumer_secret = 'gnlrkkoYNUNZT2B2sshoVIvfkjvRRosI7DWcLNlZ89Ubwrkqbt'
 
-access_token = '741468980-hirgAI1iuJr8RyLlWS4zX86YsFVTsvnH84cNw4ND'
-access_token_secret = 'FcUyRls8TBRQkloHTiWMqxzt1kboBnKXe7zDA8KEIZIjJ'
+ACCESS_TOKEN = '741468980-hirgAI1iuJr8RyLlWS4zX86YsFVTsvnH84cNw4ND'
+ACCESS_SECRET = 'FcUyRls8TBRQkloHTiWMqxzt1kboBnKXe7zDA8KEIZIjJ'
+CONSUMER_KEY = 'HxTwHU4NS9ozBy5umXh5Y0VYv'
+CONSUMER_SECRET = 'gnlrkkoYNUNZT2B2sshoVIvfkjvRRosI7DWcLNlZ89Ubwrkqbt'
 
-auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-auth.set_access_token(access_token, access_token_secret)
 
-api = tweepy.API(auth)
+auth = requests_oauthlib.OAuth1(CONSUMER_KEY, CONSUMER_SECRET,ACCESS_TOKEN, ACCESS_SECRET)
+
 
 def get_tweets():
 
-    public_tweets = api.search('Suicide')
-    return public_tweets
+    url = 'https://stream.twitter.com/1.1/statuses/filter.json'
+    query_data = [('language', 'en'), ('locations', '-130,-20,100,50'), ('track', '#')]
+    query_url = url + '?' + '&'.join([str(t[0]) + '=' + str(t[1]) for t in query_data])
+    response = requests.get(query_url, auth=auth, stream=True)
+    print(query_url, response)
+    return response
 
 
-def send_tweets_to_spark(public_tweets, tcp_connection):
+def send_tweets_to_spark(http_resp, tcp_connection):
 
-    for tweet in public_tweets:
+    for line in http_resp.iter_lines():
         try:
-            tweet_text = tweet.text
+            full_tweet = json.loads(line)
+            print("Json Format --> "+full_tweet)
+            tweet_text = full_tweet['text']
             print("Tweet Text: " + tweet_text)
             print("------------------------------------------")
             tcp_connection.send(tweet_text + '\n')
