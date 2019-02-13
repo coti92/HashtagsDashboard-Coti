@@ -3,6 +3,7 @@ import sys
 import requests
 import requests_oauthlib
 import json
+from textblob import TextBlob
 
 
 ACCESS_TOKEN = '741468980-hirgAI1iuJr8RyLlWS4zX86YsFVTsvnH84cNw4ND'
@@ -31,9 +32,13 @@ def send_tweets_to_spark(http_resp, tcp_connection):
             full_tweet = json.loads(line)
             print(json.dumps(full_tweet, indent=4, sort_keys=True))
             tweet_text = str(full_tweet['text'].decode('utf-8'))
+            analysis = TextBlob(tweet_text)
+            print(analysis.sentiment)
             print("Tweet Text: " + tweet_text)
             print("------------------------------------------")
-            tcp_connection.send(tweet_text + '\n')
+            if (analysis < 0):
+                tcp_connection.send(tweet_text + '\n')
+                print("------------------------------------------")
         except :
             e = sys.exc_info()[0]
             print("Error: %s" % e)
