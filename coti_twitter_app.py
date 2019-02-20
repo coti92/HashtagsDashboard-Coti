@@ -18,7 +18,9 @@ auth = requests_oauthlib.OAuth1(CONSUMER_KEY, CONSUMER_SECRET,ACCESS_TOKEN, ACCE
 def get_tweets():
 
     url = 'https://stream.twitter.com/1.1/statuses/filter.json'
-    query_data = [('language', 'en'), ('locations', '-130,-20,100,50'), ('track', '#')]
+    # query_data = [('language', 'en'), ('locations', '-130,-20,100,50'), ('track', '#')]
+    # query_data = [('language', 'es'), ('locations','1.883205,41.223872,2.348228,41.504076'), ('track', 'suicidio')]
+    query_data = [('language', 'en'), ('locations', '-166.7,9.1,-49.2,72.2'), ('track', '#,suicide,death,mental illness,kamikaze,depression,kill,homicide,seppuku,alcoholism,bipolar disorder,schizophrenia,suicidal ideation,felo-de-se,killer,killing,murder,assassination,major depressive disorder,substance abuse,bullying,assisted suicide,self-harm,terrorist,sin,euthanasia,self-annihilation,self-destruction,slayer,borderline personality disorder,mental disorder,deadly,bombing,attack,fatal,bomb,revenge,risk factor')]
     query_url = url + '?' + '&'.join([str(t[0]) + '=' + str(t[1]) for t in query_data])
     response = requests.get(query_url, auth=auth, stream=True)
     print(query_url, response)
@@ -30,13 +32,13 @@ def send_tweets_to_spark(http_resp, tcp_connection):
     for line in http_resp.iter_lines():
         try:
             full_tweet = json.loads(line)
-            print(json.dumps(full_tweet, indent=4, sort_keys=True))
-            tweet_text = str(full_tweet['text'].decode('utf-8'))
+            #print(json.dumps(full_tweet, indent=4, sort_keys=True))
+            tweet_text = full_tweet['text']
             analysis = TextBlob(tweet_text)
             print(analysis.sentiment)
             print("Tweet Text: " + tweet_text)
             print("------------------------------------------")
-            if (analysis < 0):
+            if (analysis.sentiment.polarity < 0):
                 tcp_connection.send(tweet_text + '\n')
                 print("------------------------------------------")
         except :
