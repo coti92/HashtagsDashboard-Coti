@@ -23,20 +23,20 @@ def process_rdd(time, rdd):
         sql_context = get_sql_context_instance(rdd.context)
 
         # convierte el RDD a Row RDD
-        row_rdd = rdd.map(lambda w: Row(hashtag=w[0], hashtag_count=w[1]))
+        row_rdd = rdd.map(lambda w: Row(tweet=w[0], tweet_count=w[1]))
 
         # crea un DF desde el Row RDD
-        hashtags_df = sql_context.createDataFrame(row_rdd)
+        tweet_df = sql_context.createDataFrame(row_rdd)
 
         # Registra el marco de data como tabla
-        hashtags_df.registerTempTable("hashtags")
+        tweet_df.registerTempTable("tweet")
 
         # obten los 10 mejores hashtags de la tabla utilizando sqL e imprimelos
-        hashtag_counts_df = sql_context.sql( "select hashtag , hashtag_count from hashtags order by hashtag_count desc limit 10" )
-        hashtag_counts_df.show()
+        tweet_counts_df = sql_context.sql( "select tweet , tweet_count from tweet where (tweet_count > 2 and tweet <> '' and tweet is not null) order by tweet_count desc limit 10" )
+        tweet_counts_df.show()
 
         # llama a este metodo para preparar los 10 mejores hashtag DF y envialos
-        send_df_to_dashboard(hashtag_counts_df)
+        send_df_to_dashboard(tweet_counts_df)
 
     except:
         e = sys.exc_info()[0]
@@ -51,13 +51,13 @@ def aggregate_tags_count(new_values, total_sum):
 
 def send_df_to_dashboard(df):
     # extrae los hashtags del marco de data y conviertelos en una matriz
-    top_tags = [str(t.hashtag) for t in df.select("hashtag").collect()]
+    top_tags = [str(t.tweet) for t in df.select("tweet").collect()]
 
     # extrae las cuentas del marco de data y conviertelos en una matriz
-    tags_count = [p.hashtag_count for p in df.select("hashtag_count").collect()]
+    tags_count = [p.tweet_count for p in df.select("tweet_count").collect()]
 
     # inicia y envia la data a traves de la API REST
-    url = 'http://localhost:5001/updateData'
+    url = 'http://localhost:5002/updateData'
     request_data = {'label': str(top_tags), 'data': str(tags_count)}
     response = requests.post(url, data=request_data)
 
@@ -78,16 +78,13 @@ ssc = StreamingContext(sc, 2)
 ssc.checkpoint("checkpoint_TwitterApp")
 
 # lee data del puerto 9009
-dataStream = ssc.socketTextStream("localhost",9009)
-
-# divide cada Tweet en palabras
-words = dataStream.flatMap(lambda line: line.split(" "))
+dataStream = ssc.socketTextStream("localhost",9008)
 
 # filtra las palabras para obtener solo hashtags, luego mapea cada hashtag para que sea un par de (hashtag,1)
-hashtags = words.filter(lambda w: '#' in w).map(lambda x: (x, 1))
+tweet = dataStream.map(lambda x: (x, 1))
 
 # agrega la cuenta de cada hashtag a su ultima cuenta
-tags_totals = hashtags.updateStateByKey(aggregate_tags_count)
+tags_totals = tweet.updateStateByKey(aggregate_tags_count)
 
 # procesa cada RDD generado en cada intervalo
 tags_totals.foreachRDD(process_rdd)
